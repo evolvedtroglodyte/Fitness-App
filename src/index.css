@@ -1,0 +1,199 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 255 255 255;
+    --foreground: 0 0 0;
+    --primary: 0 122 255;        /* iOS Blue */
+    --secondary: 94 92 230;      /* Modern Purple */
+    --accent: 255 149 0;         /* Apple Orange */
+    --success: 52 199 89;        /* Apple Green */
+    --error: 255 59 48;          /* Apple Red */
+  }
+
+  .dark {
+    --background: 0 0 0;
+    --foreground: 255 255 255;
+  }
+
+  html {
+    /* Fluid base font size: 14px on mobile, scales to 16px on desktop */
+    font-size: clamp(14px, 0.875rem + 0.5vw, 16px);
+  }
+
+  body {
+    @apply bg-white dark:bg-dark-background text-gray-900 dark:text-dark-text;
+    @apply transition-colors duration-300;
+    margin: 0;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* Removed retro terminal effects for modern, clean aesthetic */
+
+  /* Fluid heading sizes */
+  h1 {
+    font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.5rem);
+  }
+
+  h2 {
+    font-size: clamp(1.25rem, 1rem + 1.25vw, 2rem);
+  }
+
+  h3 {
+    font-size: clamp(1.125rem, 0.9rem + 1vw, 1.5rem);
+  }
+
+  h4 {
+    font-size: clamp(1rem, 0.85rem + 0.75vw, 1.25rem);
+  }
+
+  * {
+    @apply border-gray-200 dark:border-dark-border;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-dark-surface;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500 dark:bg-gray-500;
+  }
+}
+
+@layer components {
+  .modern-input {
+    @apply font-sans bg-transparent border-none outline-none;
+    @apply text-dark-text dark:text-dark-text;
+    @apply placeholder-gray-400 dark:placeholder-dark-text-tertiary;
+  }
+
+  .input-prompt {
+    @apply font-sans text-primary dark:text-primary;
+  }
+
+  .modern-border {
+    @apply border border-light-border dark:border-dark-border;
+    @apply shadow-sm;
+  }
+
+  .section-container {
+    @apply p-4 rounded-xl;
+    @apply bg-light-card dark:bg-dark-card;
+    @apply border border-light-border dark:border-dark-border;
+    @apply transition-all duration-300;
+  }
+
+  .section-container:hover {
+    @apply shadow-lg;
+    @apply border-light-border-light dark:border-dark-border-light;
+  }
+
+  .btn-primary {
+    @apply px-4 py-2 rounded-xl font-semibold;
+    @apply bg-primary text-white;
+    @apply hover:bg-primary-dark;
+    @apply transition-all duration-200;
+    @apply active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 rounded-xl font-medium;
+    @apply bg-light-surface dark:bg-dark-surface text-light-text dark:text-dark-text;
+    @apply hover:bg-light-border dark:hover:bg-dark-surface-light;
+    @apply transition-all duration-200;
+    @apply active:scale-95;
+  }
+
+  .macro-ring {
+    @apply transition-all duration-500 ease-out;
+  }
+
+  .activity-card {
+    @apply p-4 rounded-xl;
+    @apply bg-light-card dark:bg-dark-card;
+    @apply border border-light-border dark:border-dark-border;
+    @apply hover:shadow-md;
+    @apply transition-all duration-200;
+  }
+}
+
+@layer utilities {
+  /* Fluid typography utilities */
+  .text-fluid-sm {
+    font-size: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  }
+
+  .text-fluid-base {
+    font-size: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+  }
+
+  .text-fluid-lg {
+    font-size: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+  }
+
+  .text-fluid-xl {
+    font-size: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+  }
+
+  .text-fluid-2xl {
+    font-size: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+  }
+
+  .text-fluid-3xl {
+    font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
+  }
+
+  .text-fluid-4xl {
+    font-size: clamp(1.75rem, 1.4rem + 1.75vw, 2.5rem);
+  }
+
+  .animate-subtle-pulse {
+    animation: subtle-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes subtle-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.85;
+    }
+  }
+
+  .fullscreen-section {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    @apply bg-white dark:bg-dark-background;
+  }
+
+  .grid-fitness-layout {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .grid-fitness-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+}
