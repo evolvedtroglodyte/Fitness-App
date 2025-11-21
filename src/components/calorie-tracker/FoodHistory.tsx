@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Edit2, Clock } from 'lucide-react';
+import { Trash2, Edit2, Clock, ExternalLink } from 'lucide-react';
 import type { Food } from '../../types';
 import { formatRelativeTime } from '../../utils/calculations';
 import { Card } from '../shared/Card';
@@ -77,6 +77,12 @@ export const FoodHistory: React.FC<FoodHistoryProps> = ({ foods, onRemove, onEdi
                     <Clock className="w-3 h-3" />
                     <span>{formatRelativeTime(new Date(food.timestamp))}</span>
                   </span>
+                  {food.source && (
+                    <span className="flex items-center space-x-1 text-primary">
+                      <ExternalLink className="w-3 h-3" />
+                      <span className="font-medium">{food.source}</span>
+                    </span>
+                  )}
                 </div>
               </div>
 

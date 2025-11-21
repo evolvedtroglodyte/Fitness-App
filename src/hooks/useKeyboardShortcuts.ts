@@ -86,6 +86,7 @@ export function useGlobalKeyboardShortcuts(
     // Space bar for fullscreen toggle
     shortcuts.push({
       key: ' ',
+      preventDefault: false, // Let handler decide whether to prevent default
       handler: (e) => {
         // Only trigger if not in an input field or contentEditable element
         const target = e.target as HTMLElement;

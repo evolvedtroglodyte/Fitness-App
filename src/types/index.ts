@@ -9,6 +9,7 @@ export interface Food {
   carbs: number;
   fat: number;
   serving?: string;
+  source?: string; // Optional nutrition source citation (e.g., "Chipotle Nutrition Calculator")
   timestamp: Date;
 }
 

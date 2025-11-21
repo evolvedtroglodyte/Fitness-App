@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Edit2, Search, Coffee } from 'lucide-react';
+import { Plus, Trash2, Edit2, Search, Coffee, Sparkles } from 'lucide-react';
 import { useCalorieStore, useUserStore } from '../../stores';
 import { TerminalInput } from '../shared/TerminalInput';
 import { Card } from '../shared/Card';
@@ -10,6 +10,7 @@ import { MacroRings } from './MacroRings';
 import { FoodHistory } from './FoodHistory';
 import { DailySummary } from './DailySummary';
 import { parseFoodInput, searchFoods, findFoodInDatabase, validateFoodInput } from '../../utils/foodParser';
+import { parseFoodWithChatGPT } from '../../services/chatgpt';
 import type { Food } from '../../types';
 
 interface CalorieTrackerSectionProps {
@@ -21,6 +22,9 @@ export const CalorieTrackerSection: React.FC<CalorieTrackerSectionProps> = ({ co
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [error, setError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUsingAI, setIsUsingAI] = useState(false);
+  const [showClarification, setShowClarification] = useState(false);
+  const [failedInput, setFailedInput] = useState('');
   const todaysFoods = useCalorieStore((state) => state.todaysFoods);
   const recentFoods = useCalorieStore((state) => state.recentFoods);
   const addFood = useCalorieStore((state) => state.addFood);
@@ -55,50 +59,80 @@ export const CalorieTrackerSection: React.FC<CalorieTrackerSectionProps> = ({ co
     }
 
     setIsSubmitting(true);
-
-    // Simulate async operation for better UX
-    await new Promise(resolve => setTimeout(resolve, 300));
+    setIsUsingAI(false);
 
     const parsedFoods = parseFoodInput(input);
 
-    parsedFoods.forEach((parsed) => {
-      const foodData = findFoodInDatabase(parsed.name);
+    // Check if this is a manual calorie entry
+    const hasManualCalories = parsedFoods.some(p => p.calories);
 
-      if (foodData) {
-        // Calculate based on quantity if provided
-        const multiplier = parsed.quantity || 1;
-        addFood({
-          name: parsed.name,
-          calories: Math.round(foodData.calories * multiplier),
-          protein: Math.round(foodData.protein * multiplier),
-          carbs: Math.round(foodData.carbs * multiplier),
-          fat: Math.round(foodData.fat * multiplier),
-          serving: parsed.quantity ? `${parsed.quantity} ${parsed.unit || 'serving'}` : foodData.serving,
-        });
-      } else if (parsed.calories) {
-        // Custom food with specified calories
-        addFood({
-          name: parsed.name,
-          calories: parsed.calories,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-          serving: '1 serving',
-        });
-      } else {
-        // Unknown food - show error with suggestions
-        const similarFoods = searchFoods(parsed.name, 3);
-        if (similarFoods.length > 0) {
-          const suggestions = similarFoods.map(f => f.name).join(', ');
-          setError(`Food "${parsed.name}" not found. Did you mean: ${suggestions}?`);
-        } else {
-          setError(`Food "${parsed.name}" not recognized. Try: "2 eggs", "chicken breast 200g", or "custom meal 350cal"`);
+    if (hasManualCalories) {
+      // Handle manual calorie entries (e.g., "custom meal 350cal")
+      parsedFoods.forEach((parsed) => {
+        if (parsed.calories) {
+          addFood({
+            name: parsed.name,
+            calories: parsed.calories,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            serving: '1 serving',
+          });
         }
-        setIsSubmitting(false);
-        return; // Don't add unknown foods
-      }
-    });
+      });
 
+      setInput('');
+      setError('');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // All food parsing goes through ChatGPT (no local database)
+    // Call ChatGPT ONCE with the full input (not in a loop)
+    setIsUsingAI(true);
+
+    try {
+      const aiResult = await parseFoodWithChatGPT(input);
+
+      if (aiResult) {
+        // Successfully parsed with ChatGPT
+        addFood({
+          name: aiResult.name,
+          calories: aiResult.calories,
+          protein: aiResult.protein,
+          carbs: aiResult.carbs,
+          fat: aiResult.fat,
+          serving: aiResult.serving,
+          source: aiResult.source, // Include source citation
+        });
+
+        // Show success indicator with source
+        if (aiResult.source) {
+          console.log(`✨ Parsed with AI (${aiResult.confidence} confidence) - Source: ${aiResult.source}`);
+        } else {
+          console.log(`✨ Parsed with AI (${aiResult.confidence} confidence):`, aiResult.name);
+        }
+      } else {
+        // ChatGPT couldn't parse - ask for clarification
+        setFailedInput(input);
+        setShowClarification(true);
+        setError('');
+        setIsSubmitting(false);
+        setIsUsingAI(false);
+        return;
+      }
+    } catch (error) {
+      // API error (likely missing API key or network issue)
+      console.error('ChatGPT API error:', error);
+
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setError(`ChatGPT API error: ${errorMessage}. Check your API key in .env file.`);
+      setIsSubmitting(false);
+      setIsUsingAI(false);
+      return;
+    }
+
+    setIsUsingAI(false);
     setInput('');
     setError('');
     setIsSubmitting(false);
@@ -108,6 +142,56 @@ export const CalorieTrackerSection: React.FC<CalorieTrackerSectionProps> = ({ co
     setInput(suggestion);
     setSuggestions([]);
     handleAddFood();
+  };
+
+  const handleClarificationSubmit = async (clarification: string) => {
+    if (!clarification.trim()) {
+      setError('Please provide more details');
+      return;
+    }
+
+    // Combine original input with clarification
+    const enhancedInput = `${failedInput}. ${clarification}`;
+
+    setShowClarification(false);
+    setIsSubmitting(true);
+    setIsUsingAI(true);
+
+    try {
+      const aiResult = await parseFoodWithChatGPT(enhancedInput);
+
+      if (aiResult) {
+        // Successfully parsed with additional context
+        addFood({
+          name: aiResult.name,
+          calories: aiResult.calories,
+          protein: aiResult.protein,
+          carbs: aiResult.carbs,
+          fat: aiResult.fat,
+          serving: aiResult.serving,
+          source: aiResult.source,
+        });
+
+        if (aiResult.source) {
+          console.log(`✨ Parsed with AI after clarification (${aiResult.confidence} confidence) - Source: ${aiResult.source}`);
+        } else {
+          console.log(`✨ Parsed with AI after clarification (${aiResult.confidence} confidence):`, aiResult.name);
+        }
+
+        setInput('');
+        setFailedInput('');
+      } else {
+        // Still couldn't parse - show final error
+        setError(`Still couldn't recognize the food. Try using: "custom meal 350cal"`);
+      }
+    } catch (error) {
+      console.error('ChatGPT API error on retry:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setError(`ChatGPT API error: ${errorMessage}`);
+    }
+
+    setIsSubmitting(false);
+    setIsUsingAI(false);
   };
 
   // Quick add presets
@@ -164,9 +248,48 @@ export const CalorieTrackerSection: React.FC<CalorieTrackerSectionProps> = ({ co
             placeholder="add food..."
             prompt=">"
           />
-          {error && (
+          {isUsingAI && (
+            <div className="mt-1 text-xs text-primary font-sans flex items-center space-x-1">
+              <Sparkles className="w-3 h-3 animate-pulse" />
+              <span>Analyzing with AI...</span>
+            </div>
+          )}
+          {error && !isUsingAI && (
             <div className="mt-1 text-xs text-fitness-error font-sans">
               ⚠ {error}
+            </div>
+          )}
+          {showClarification && (
+            <div className="mt-2 p-2 bg-primary/10 dark:bg-primary/20 rounded">
+              <div className="text-xs text-gray-700 dark:text-gray-300 mb-2">
+                Couldn't recognize "{failedInput}". Add details:
+              </div>
+              <TerminalInput
+                value={input}
+                onChange={setInput}
+                onSubmit={() => handleClarificationSubmit(input)}
+                placeholder="e.g., brand name, size..."
+                prompt=">"
+              />
+              <div className="mt-1 flex space-x-1">
+                <button
+                  onClick={() => handleClarificationSubmit(input)}
+                  disabled={!input.trim()}
+                  className="flex-1 px-2 py-1 text-xs bg-primary text-white rounded hover:bg-primary-dark disabled:opacity-50"
+                >
+                  Retry
+                </button>
+                <button
+                  onClick={() => {
+                    setShowClarification(false);
+                    setInput('');
+                    setFailedInput('');
+                  }}
+                  className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -208,6 +331,14 @@ export const CalorieTrackerSection: React.FC<CalorieTrackerSectionProps> = ({ co
           error={error}
           isSubmitting={isSubmitting}
         />
+        {isUsingAI && (
+          <div className="mt-3 p-3 bg-primary/10 dark:bg-primary/20 rounded-lg">
+            <div className="flex items-center space-x-2 text-sm text-primary font-sans">
+              <Sparkles className="w-4 h-4 animate-pulse" />
+              <span>Analyzing food with AI...</span>
+            </div>
+          </div>
+        )}
 
         {/* Quick Add Presets */}
         <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -235,6 +366,62 @@ export const CalorieTrackerSection: React.FC<CalorieTrackerSectionProps> = ({ co
           ))}
         </div>
       </Card>
+
+      {/* Clarification Prompt */}
+      {showClarification && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text mb-2">
+                  Need More Details
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  I couldn't recognize "<span className="font-semibold text-gray-900 dark:text-dark-text">{failedInput}</span>".
+                  Can you provide more details to help me understand?
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="clarification-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Additional details (e.g., brand name, preparation method, serving size):
+                </label>
+                <TerminalInput
+                  id="clarification-input"
+                  value={input}
+                  onChange={setInput}
+                  onSubmit={() => handleClarificationSubmit(input)}
+                  placeholder="e.g., 'it's a McDonald's burger' or 'grilled chicken, about 6oz'"
+                  prompt=">"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Button
+                  onClick={() => handleClarificationSubmit(input)}
+                  disabled={!input.trim() || isSubmitting}
+                  className="flex-1"
+                >
+                  {isSubmitting ? 'Retrying...' : 'Retry with Details'}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setShowClarification(false);
+                    setInput('');
+                    setFailedInput('');
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Food History */}
       <FoodHistory

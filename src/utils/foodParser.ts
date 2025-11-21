@@ -62,78 +62,16 @@ export function validateFoodInput(input: string): ValidationResult {
   return { isValid: true };
 }
 
-// Common food database (mock data - in production, this would come from an API)
-export const foodDatabase = [
-  // Fruits
-  { name: 'apple', calories: 95, protein: 0.5, carbs: 25, fat: 0.3, serving: '1 medium' },
-  { name: 'banana', calories: 105, protein: 1.3, carbs: 27, fat: 0.4, serving: '1 medium' },
-  { name: 'orange', calories: 62, protein: 1.2, carbs: 15, fat: 0.2, serving: '1 medium' },
-  { name: 'strawberries', calories: 49, protein: 1, carbs: 12, fat: 0.5, serving: '1 cup' },
-  { name: 'grapes', calories: 104, protein: 1.1, carbs: 27, fat: 0.2, serving: '1 cup' },
-  { name: 'watermelon', calories: 46, protein: 0.9, carbs: 11.5, fat: 0.2, serving: '1 cup' },
-  { name: 'blueberries', calories: 84, protein: 1, carbs: 21, fat: 0.5, serving: '1 cup' },
-
-  // Proteins
-  { name: 'eggs', calories: 78, protein: 6.3, carbs: 0.6, fat: 5.3, serving: '1 large' },
-  { name: 'egg', calories: 78, protein: 6.3, carbs: 0.6, fat: 5.3, serving: '1 large' },
-  { name: 'chicken breast', calories: 165, protein: 31, carbs: 0, fat: 3.6, serving: '100g' },
-  { name: 'chicken', calories: 165, protein: 31, carbs: 0, fat: 3.6, serving: '100g' },
-  { name: 'salmon', calories: 208, protein: 28, carbs: 0, fat: 10, serving: '100g' },
-  { name: 'turkey', calories: 135, protein: 30, carbs: 0, fat: 1, serving: '100g' },
-  { name: 'tuna', calories: 128, protein: 28, carbs: 0, fat: 1, serving: '100g' },
-  { name: 'beef', calories: 250, protein: 26, carbs: 0, fat: 15, serving: '100g' },
-  { name: 'pork', calories: 242, protein: 27, carbs: 0, fat: 14, serving: '100g' },
-  { name: 'shrimp', calories: 99, protein: 24, carbs: 0.2, fat: 0.3, serving: '100g' },
-  { name: 'tofu', calories: 76, protein: 8, carbs: 1.9, fat: 4.8, serving: '100g' },
-
-  // Grains & Carbs
-  { name: 'rice', calories: 206, protein: 4.3, carbs: 45, fat: 0.4, serving: '1 cup cooked' },
-  { name: 'pasta', calories: 220, protein: 8, carbs: 43, fat: 1.3, serving: '1 cup cooked' },
-  { name: 'quinoa', calories: 222, protein: 8, carbs: 39, fat: 3.6, serving: '1 cup cooked' },
-  { name: 'oatmeal', calories: 150, protein: 5, carbs: 27, fat: 3, serving: '1/2 cup dry' },
-  { name: 'oats', calories: 150, protein: 5, carbs: 27, fat: 3, serving: '1/2 cup dry' },
-  { name: 'bread', calories: 79, protein: 2.7, carbs: 15, fat: 0.9, serving: '1 slice' },
-  { name: 'toast', calories: 79, protein: 2.7, carbs: 15, fat: 0.9, serving: '1 slice' },
-  { name: 'bagel', calories: 289, protein: 11, carbs: 56, fat: 2, serving: '1 bagel' },
-  { name: 'tortilla', calories: 150, protein: 4, carbs: 26, fat: 3.5, serving: '1 large' },
-  { name: 'pancakes', calories: 227, protein: 6, carbs: 28, fat: 10, serving: '2 medium' },
-  { name: 'waffles', calories: 218, protein: 6, carbs: 25, fat: 11, serving: '2 medium' },
-
-  // Vegetables
-  { name: 'broccoli', calories: 31, protein: 2.5, carbs: 6, fat: 0.4, serving: '1 cup' },
-  { name: 'spinach', calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4, serving: '100g' },
-  { name: 'carrots', calories: 52, protein: 1.2, carbs: 12, fat: 0.3, serving: '1 cup' },
-  { name: 'tomato', calories: 22, protein: 1.1, carbs: 4.8, fat: 0.2, serving: '1 medium' },
-  { name: 'cucumber', calories: 16, protein: 0.7, carbs: 3.6, fat: 0.1, serving: '1 cup' },
-  { name: 'lettuce', calories: 5, protein: 0.5, carbs: 1, fat: 0.1, serving: '1 cup' },
-  { name: 'sweet potato', calories: 86, protein: 1.6, carbs: 20, fat: 0.1, serving: '100g' },
-  { name: 'potato', calories: 130, protein: 3, carbs: 30, fat: 0.2, serving: '1 medium' },
-
-  // Dairy
-  { name: 'milk', calories: 150, protein: 8, carbs: 12, fat: 8, serving: '1 cup' },
-  { name: 'greek yogurt', calories: 100, protein: 17, carbs: 6, fat: 0.7, serving: '170g' },
-  { name: 'yogurt', calories: 100, protein: 17, carbs: 6, fat: 0.7, serving: '170g' },
-  { name: 'cheese', calories: 113, protein: 7, carbs: 1, fat: 9, serving: '1 slice' },
-  { name: 'cheddar', calories: 113, protein: 7, carbs: 1, fat: 9, serving: '1 slice' },
-  { name: 'butter', calories: 102, protein: 0.1, carbs: 0, fat: 11.5, serving: '1 tbsp' },
-  { name: 'cream cheese', calories: 51, protein: 1, carbs: 0.8, fat: 5, serving: '1 tbsp' },
-
-  // Nuts & Seeds
-  { name: 'almonds', calories: 164, protein: 6, carbs: 6, fat: 14, serving: '1 oz' },
-  { name: 'peanuts', calories: 161, protein: 7, carbs: 5, fat: 14, serving: '1 oz' },
-  { name: 'peanut butter', calories: 188, protein: 8, carbs: 7, fat: 16, serving: '2 tbsp' },
-  { name: 'walnuts', calories: 185, protein: 4.3, carbs: 3.9, fat: 18.5, serving: '1 oz' },
-  { name: 'cashews', calories: 157, protein: 5, carbs: 9, fat: 12, serving: '1 oz' },
-
-  // Other
-  { name: 'avocado', calories: 320, protein: 4, carbs: 17, fat: 29, serving: '1 whole' },
-  { name: 'olive oil', calories: 119, protein: 0, carbs: 0, fat: 13.5, serving: '1 tbsp' },
-  { name: 'honey', calories: 64, protein: 0.1, carbs: 17, fat: 0, serving: '1 tbsp' },
-  { name: 'sugar', calories: 49, protein: 0, carbs: 13, fat: 0, serving: '1 tbsp' },
-  { name: 'coffee', calories: 2, protein: 0.3, carbs: 0, fat: 0, serving: '1 cup' },
-  { name: 'protein shake', calories: 120, protein: 25, carbs: 3, fat: 1.5, serving: '1 scoop' },
-  { name: 'protein bar', calories: 200, protein: 20, carbs: 22, fat: 7, serving: '1 bar' },
-];
+// Food database - EMPTY for ChatGPT-only testing
+// All food parsing will go through ChatGPT API
+export const foodDatabase: Array<{
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  serving: string;
+}> = [];
 
 // Parse natural language food input
 export function parseFoodInput(input: string): ParsedFood[] {
