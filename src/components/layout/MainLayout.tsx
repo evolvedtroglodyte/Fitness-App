@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon, Monitor, Maximize2, Home } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';

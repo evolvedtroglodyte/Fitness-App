@@ -1,12 +1,11 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 import type {
   Food,
   CardioActivity,
   Workout,
   UserPreferences,
-  DailyNutrition,
-  MacroGoals
+  DailyNutrition
 } from '../types';
 
 // Calorie Store

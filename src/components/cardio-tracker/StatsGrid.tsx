@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Activity, MapPin, Clock, Flame, TrendingUp, Calendar } from 'lucide-react';
+import { Activity, MapPin, Clock, Flame, Calendar } from 'lucide-react';
 import { formatDistance, formatDuration } from '../../utils/calculations';
 
 interface StatsGridProps {

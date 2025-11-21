@@ -239,7 +239,7 @@ function normalizeExerciseName(name: string): string {
 
 // Convert parsed exercises to Exercise type
 export function convertToExercises(parsedExercises: ParsedExercise[]): Exercise[] {
-  return parsedExercises.map((parsed, index) => ({
+  return parsedExercises.map((parsed) => ({
     id: crypto.randomUUID(),
     name: parsed.name,
     sets: parsed.sets,

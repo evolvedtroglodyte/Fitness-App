@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Activity, Play, Plus, MapPin, Heart, TrendingUp, Clock } from 'lucide-react';
+import { Activity, Play, Plus } from 'lucide-react';
 import { useCardioStore, useUserStore } from '../../stores';
 import { Card } from '../shared/Card';
 import { Button } from '../shared/Button';
@@ -8,7 +7,7 @@ import { TerminalInput } from '../shared/TerminalInput';
 import { ActivityCard } from './ActivityCard';
 import { StatsGrid } from './StatsGrid';
 import type { CardioActivity } from '../../types';
-import { formatDistance, formatDuration, calculatePace, calculateCardioCalories } from '../../utils/calculations';
+import { formatDistance, formatDuration, calculateCardioCalories } from '../../utils/calculations';
 
 interface CardioTrackerSectionProps {
   compact?: boolean;

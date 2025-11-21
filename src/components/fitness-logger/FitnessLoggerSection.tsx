@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Dumbbell, Plus, Calendar, TrendingUp, Trophy, Target, Trash2, Edit2 } from 'lucide-react';
-import { useFitnessStore, useUserStore } from '../../stores';
+import { motion } from 'framer-motion';
+import { Dumbbell, Plus, Calendar, TrendingUp, Trophy, Trash2, Edit2 } from 'lucide-react';
+import { useFitnessStore } from '../../stores';
 import { TerminalInput } from '../shared/TerminalInput';
 import { Card } from '../shared/Card';
 import { Button } from '../shared/Button';
 import { WorkoutInput } from './WorkoutInput';
 import { ExerciseList } from './ExerciseList';
 import { parseWorkoutInput, convertToExercises, formatExercise, calculateVolume, validateWorkoutInput } from '../../utils/workoutParser';
-import type { Workout, Exercise } from '../../types';
+import type { Exercise } from '../../types';
 
 interface FitnessLoggerSectionProps {
   compact?: boolean;
@@ -25,7 +25,6 @@ export const FitnessLoggerSection: React.FC<FitnessLoggerSectionProps> = ({ comp
   const addWorkout = useFitnessStore((state) => state.addWorkout);
   const removeWorkout = useFitnessStore((state) => state.removeWorkout);
   const getPersonalRecords = useFitnessStore((state) => state.getPersonalRecords);
-  const preferences = useUserStore((state) => state.preferences);
   const personalRecords = getPersonalRecords();
 
   // Parse input in real-time
@@ -269,7 +268,6 @@ export const FitnessLoggerSection: React.FC<FitnessLoggerSectionProps> = ({ comp
                 variant="secondary"
                 size="sm"
                 onClick={() => {
-                  const type = template.toLowerCase().replace(' day', '');
                   setInput(`${template}: `);
                 }}
                 className="flex items-center justify-center space-x-2"

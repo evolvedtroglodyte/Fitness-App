@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Edit2, Search, Coffee, Sparkles } from 'lucide-react';
-import { useCalorieStore, useUserStore } from '../../stores';
+import { Coffee, Sparkles } from 'lucide-react';
+import { useCalorieStore } from '../../stores';
 import { TerminalInput } from '../shared/TerminalInput';
 import { Card } from '../shared/Card';
 import { Button } from '../shared/Button';
@@ -9,9 +9,8 @@ import { FoodInput } from './FoodInput';
 import { MacroRings } from './MacroRings';
 import { FoodHistory } from './FoodHistory';
 import { DailySummary } from './DailySummary';
-import { parseFoodInput, searchFoods, findFoodInDatabase, validateFoodInput } from '../../utils/foodParser';
+import { parseFoodInput, searchFoods, validateFoodInput } from '../../utils/foodParser';
 import { parseFoodWithChatGPT } from '../../services/chatgpt';
-import type { Food } from '../../types';
 
 interface CalorieTrackerSectionProps {
   compact?: boolean;
@@ -30,7 +29,6 @@ export const CalorieTrackerSection: React.FC<CalorieTrackerSectionProps> = ({ co
   const addFood = useCalorieStore((state) => state.addFood);
   const removeFood = useCalorieStore((state) => state.removeFood);
   const getTodaysNutrition = useCalorieStore((state) => state.getTodaysNutrition);
-  const preferences = useUserStore((state) => state.preferences);
   const [nutrition, setNutrition] = useState(() => getTodaysNutrition());
 
   useEffect(() => {
